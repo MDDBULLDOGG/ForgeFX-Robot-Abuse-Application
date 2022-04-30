@@ -1,18 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
+// The CoreController script is responsible for initializing the appropriate objects such as the
+// sceneObject and statusObject upon the environment's start.
+
+//TODO: Initialize statusObject for monitoring limb status
 public class CoreController : MonoBehaviour
 {
-    // Start is called before the first frame update
     void Start()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        Object prefabObject = Resources.Load("Robot_Toy_Prefab");
+        GameObject sceneObject = Instantiate(prefabObject) as GameObject;
     }
 }
