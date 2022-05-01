@@ -8,9 +8,9 @@ using UnityEngine;
 //TODO: Monitor limb status etc from this script as well?
 public class ObjectController : MonoBehaviour
 {
+    public CoreController coreController;
     [SerializeField] private GameObject root;
-
-    void Awake()
+    void Start()
     {
         // First, initializing colliders for all objects we want to consider movable
         foreach (Transform child in root.GetComponentsInChildren<Transform>())
@@ -18,9 +18,10 @@ public class ObjectController : MonoBehaviour
             // Since we want to consider our root to be immovable, we skip this transform
             if (child.transform == root.transform) continue;
             
-            Debug.Log("Adding default collider to " + child.name);
             child.gameObject.AddComponent<BoxCollider>();
-            child.gameObject.AddComponent<SelectionController>();
+            child.gameObject.AddComponent<SelectionController>().sceneObjectController = this;
         }
+        
+        Debug.LogError(coreController);
     }
 }

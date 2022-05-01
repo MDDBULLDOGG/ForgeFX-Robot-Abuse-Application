@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 2365895322567572822}
-  highlightMaterial: {fileID: 2100000, guid: a9e31254c889afe49b60dd108effe074, type: 2}
+  raycastPlane: {fileID: 0}
 --- !u!1001 &6931784926347333006
 PrefabInstance:
   m_ObjectHideFlags: 0
