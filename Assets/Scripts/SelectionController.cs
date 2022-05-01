@@ -1,17 +1,11 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 public class SelectionController : MonoBehaviour
 {
-    public ObjectController sceneObjectController;
-    
     private Color originalColor;
     private BoxCollider rayCastPlaneCollider;
     private bool highlighted;
-    private bool detached;
+    public bool attached = true;
     private GameObject originalParent;
     private Vector3 originalLocalPosition;
 
@@ -51,26 +45,30 @@ public class SelectionController : MonoBehaviour
             Vector3 distance = new Vector3(hit.point.x, hit.point.y, 0) -
                                new Vector3(openSocketPos.x, openSocketPos.y, 0);
             
-            if (detached)
+            if (attached)
+            {
+                if (distance.sqrMagnitude > snapDistance)
+                {
+                    this.transform.parent = null;
+
+                    attached = false;
+                    CoreController.Instance.attachmentStatusChanged.Invoke(this.name, attached);
+                }
+            }
+
+            if (attached == false)
             {
                 if (distance.sqrMagnitude < snapDistance)
                 {
-                    detached = false;
                     this.transform.parent = originalParent.transform;
                     this.transform.position = openSocketPos;
+                    
+                    attached = true;
+                    CoreController.Instance.attachmentStatusChanged.Invoke(this.name, attached);
                 }
                 else
                 {
                     this.transform.position = hit.point;
-                }
-            }
-
-            if (detached == false)
-            {
-                if (distance.sqrMagnitude > snapDistance)
-                {
-                    detached = true;
-                    this.transform.parent = null;
                 }
             }
         }
@@ -85,6 +83,7 @@ public class SelectionController : MonoBehaviour
         }
     }
 
+    // TODO: There's a bug where highlights can fall out of sync when moving the mouse quickly. Revisit this code
     private void ToggleHighlight()
     {
         if (highlighted)
