@@ -76,6 +76,5 @@ public class CoreController : MonoBehaviour
                 }
             }
         }
-        Debug.LogError("Attachment event!");
     }
 }
