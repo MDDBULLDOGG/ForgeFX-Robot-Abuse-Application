@@ -8,7 +8,6 @@ using UnityEngine;
 //TODO: Monitor limb status etc from this script as well?
 public class ObjectController : MonoBehaviour
 {
-    public CoreController coreController;
     [SerializeField] private GameObject root;
     void Start()
     {
@@ -21,7 +20,5 @@ public class ObjectController : MonoBehaviour
             child.gameObject.AddComponent<BoxCollider>();
             child.gameObject.AddComponent<SelectionController>().sceneObjectController = this;
         }
-        
-        Debug.LogError(coreController);
     }
 }

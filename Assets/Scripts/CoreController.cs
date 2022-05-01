@@ -10,13 +10,20 @@ using UnityEngine;
 //TODO: Initialize statusObject for monitoring limb status
 public class CoreController : MonoBehaviour
 { 
+    public static CoreController Instance { get; private set; }
+
     [SerializeField] public GameObject raycastPlane;
+    [HideInInspector] public GameObject sceneObject;
 
     void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+            return;
+        }
+        Instance = this;
         Object prefabObject = Resources.Load("Robot_Toy_Prefab");
-        GameObject sceneObject = Instantiate(prefabObject) as GameObject;
-        Debug.LogError(sceneObject.GetComponent<ObjectController>());
-        sceneObject.GetComponent<ObjectController>().coreController = this;
+        sceneObject = Instantiate(prefabObject) as GameObject;
     }
 }

@@ -16,7 +16,7 @@ public class SelectionController : MonoBehaviour
     private void Start()
     {
         originalColor = this.GetComponent<Renderer>().material.color;
-        rayCastPlaneCollider = sceneObjectController.coreController.raycastPlane.GetComponent<BoxCollider>();
+        rayCastPlaneCollider = CoreController.Instance.raycastPlane.GetComponent<BoxCollider>();
     }
     
     private void OnMouseEnter()
