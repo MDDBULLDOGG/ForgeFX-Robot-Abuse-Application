@@ -7,8 +7,7 @@ using UnityEngine.UI;
 // the UI.
 
 public class CoreController : MonoBehaviour
-{ 
-    
+{
     // Inspector Vars
     [SerializeField] public Canvas UICanvas;
     [SerializeField] public GameObject raycastPlane;
@@ -65,18 +64,13 @@ public class CoreController : MonoBehaviour
     // Updating our UI with correct values every time an attachmentEvent is fired
     private void AttachmentEvent(string limbName, bool attached)
     {
+        string substring = attached ? "Attached" : "Unattached";
+        
         foreach (GameObject UILine in UILines)
         {
             if (UILine.name == limbName)
             {
-                if (attached)
-                {
-                    UILine.GetComponent<Text>().text = limbName + ": " + "Attached";
-                }
-                else
-                {
-                    UILine.GetComponent<Text>().text = limbName + ": " + "Detached";
-                }
+                UILine.GetComponent<Text>().text = limbName + ": " + substring;
             }
         }
     }

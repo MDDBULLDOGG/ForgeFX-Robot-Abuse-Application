@@ -22,9 +22,9 @@ public class ObjectController : MonoBehaviour
             if (limb.transform == root.transform) continue;
             
             limb.gameObject.AddComponent<BoxCollider>();
-            LimbController childController = limb.gameObject.AddComponent<LimbController>();
+            LimbController limbController = limb.gameObject.AddComponent<LimbController>();
             
-            limbList.Add(limb.name, childController.attached);
+            limbList.Add(limb.name, limbController.attached);
         }
         
         // Call our event so that the CoreController knows our object has been properly initialized
