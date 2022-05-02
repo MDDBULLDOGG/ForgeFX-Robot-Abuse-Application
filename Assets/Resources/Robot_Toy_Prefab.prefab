@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 2365895322567572822}
-  raycastPlane: {fileID: 0}
+  snapIndicatorPrefab: {fileID: 1290648295511871007, guid: 5d3ca2b2f8dfdb240b33a18c7ca55a5f, type: 3}
 --- !u!1001 &6931784926347333006
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class LimbController : MonoBehaviour
 {
+    // Inspector Vars
+    [SerializeField] public GameObject snapIndicatorPrefab;
+
     // Our limb's Renderer and it's original values for reverting back to
     private Renderer meshRenderer;
     private Color originalColor;
@@ -15,13 +18,14 @@ public class LimbController : MonoBehaviour
     private BoxCollider rayCastPlaneCollider;
     public bool attached = true;
     private Vector3 openSocketPos;
+    private GameObject snapIndicatorObject;
     
     // isBeingDragged is necessary because our mouse can leave the limb while it's being dragged,
     // and we don't want the highlight to change until OnMouseUp in that case.
     private bool isBeingDragged;
 
     // Arbitrary distance for when we should snap a limb to it's socket
-    private float snapDistance = 0.005f;
+    private float snapDistance = 0.0025f;
     
     private void Start()
     {
@@ -60,6 +64,11 @@ public class LimbController : MonoBehaviour
             
         if (attached)
         {
+            if (snapIndicatorObject != null)
+            {
+                Destroy(snapIndicatorObject);
+            }
+            
             if (distance.sqrMagnitude > snapDistance)
             {
                 this.transform.parent = null;
@@ -70,6 +79,12 @@ public class LimbController : MonoBehaviour
         } 
         else
         {
+            if (snapIndicatorObject == null)
+            {
+                snapIndicatorObject = Instantiate(snapIndicatorPrefab, openSocketPos, Quaternion.identity);
+                snapIndicatorObject.transform.localScale = new Vector3(snapDistance, snapDistance, snapDistance);
+            }
+            
             if (distance.sqrMagnitude < snapDistance)
             {
                 this.transform.parent = originalParent.transform;
@@ -89,6 +104,11 @@ public class LimbController : MonoBehaviour
     {
         if (isBeingDragged)
             isBeingDragged = false;
+        
+        if (snapIndicatorObject != null)
+        {
+            Destroy(snapIndicatorObject);
+        }
         
         UnHighlightAllChildren();
     }

@@ -8,7 +8,8 @@ public class ObjectController : MonoBehaviour
 {
     // Inspector Vars
     public GameObject root;
-    
+    public GameObject snapIndicatorPrefab;
+
     // Runtime Vars
     public Dictionary<string, bool> limbList = new Dictionary<string, bool>();
     
@@ -33,6 +34,7 @@ public class ObjectController : MonoBehaviour
             
             limb.gameObject.AddComponent<BoxCollider>();
             LimbController limbController = limb.gameObject.AddComponent<LimbController>();
+            limbController.snapIndicatorPrefab = snapIndicatorPrefab;
             
             limbList.Add(limb.name, limbController.attached);
         }
