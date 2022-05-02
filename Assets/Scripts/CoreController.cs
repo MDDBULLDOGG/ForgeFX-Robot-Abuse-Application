@@ -2,28 +2,32 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// The CoreController script is responsible for initializing the appropriate objects upon the
-// environment's start as well as maintaining access to specific objects we'll need such as
-// the raycast plane and limb status indicator.
+// The CoreController script is responsible for initializing all of the appropriate objects on
+// environment start as well as maintaining access to specific objects we'll need such as
+// the UI.
 
-//TODO: Lists for limb status UI updates are really messy. Clean it up
 public class CoreController : MonoBehaviour
 { 
-    public Events.sceneObjectInitialized sceneObjectInitialized;
-    public Events.attachmentStatusChanged attachmentStatusChanged;
-    public GameObject prefabObject;
-
-    public static CoreController Instance { get; private set; }
-
+    
+    // Inspector Vars
     [SerializeField] public Canvas UICanvas;
     [SerializeField] public GameObject raycastPlane;
-    [HideInInspector] public GameObject sceneObject;
+    [SerializeField] public GameObject prefabObject;
 
+    // Runtime Vars
+    [HideInInspector] public GameObject sceneObject;
     private List<GameObject> UILines = new List<GameObject>();
+    
+    // Events
+    public Events.sceneObjectInitialized sceneObjectInitialized;
+    public Events.attachmentStatusChanged attachmentStatusChanged;
+    
+    // Exposing our CoreController to other scripts
+    public static CoreController Instance { get; private set; }
 
     public void Awake()
     {
-        // Making sure this is our only instance of CoreController
+        // Making sure this is our only instance of CoreController and assigning it to Instance
         if (Instance != null && Instance != this)
         {
             Destroy(this);
@@ -35,6 +39,7 @@ public class CoreController : MonoBehaviour
         sceneObject = Instantiate(prefabObject);
     }
 
+    // Start() is used to make sure all of our events aren't null
     private void Start()
     {
         sceneObjectInitialized ??= new Events.sceneObjectInitialized();
@@ -44,7 +49,7 @@ public class CoreController : MonoBehaviour
         attachmentStatusChanged.AddListener(AttachmentEvent);
     }
     
-    // Once the scene object is initialized, we want to initialize the UI with the correct values
+    // Once the scene object is initialized, we want to initialize the UI with correct values
     private void SceneObjectInitializedEvent(Dictionary<string, bool> limbList)
     {
         foreach (var key in limbList)
