@@ -10,9 +10,19 @@ public class ObjectController : MonoBehaviour
     public GameObject root;
     
     // Runtime Vars
-    private Dictionary<string, bool> limbList = new Dictionary<string, bool>();
+    public Dictionary<string, bool> limbList = new Dictionary<string, bool>();
     
     private void Start()
+    {
+        // Usually I would have this script's Initialize() method as part of Start(), however
+        // I separated them out here just for unit-testing demonstration purposes
+        Initialize();
+
+        // Call our event so that the CoreController knows our object has been properly initialized
+        CoreController.Instance.sceneObjectInitialized.Invoke(limbList);
+    }
+
+    public void Initialize()
     {
         // Initialize colliders for all objects we want to consider movable and form a Dictionary
         // to send to CoreController
@@ -26,8 +36,5 @@ public class ObjectController : MonoBehaviour
             
             limbList.Add(limb.name, limbController.attached);
         }
-        
-        // Call our event so that the CoreController knows our object has been properly initialized
-        CoreController.Instance.sceneObjectInitialized.Invoke(limbList);
     }
 }
