@@ -5,7 +5,7 @@ using UnityEngine.Events;
 [System.Serializable]
 public class Events : MonoBehaviour
 {
-    public class sceneObjectInitialized : UnityEvent<Dictionary<string, bool>>
+    public class sceneObjectInitialized : UnityEvent<List<LimbController>>
     {
     }
     

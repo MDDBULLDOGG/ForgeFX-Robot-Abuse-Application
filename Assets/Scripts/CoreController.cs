@@ -14,7 +14,7 @@ public class CoreController : MonoBehaviour
     [SerializeField] public GameObject prefabObject;
 
     // Runtime Vars
-    [HideInInspector] public GameObject sceneObject;
+    [HideInInspector] public ObjectController sceneObject;
     private List<GameObject> UILines = new List<GameObject>();
     
     // Events
@@ -35,7 +35,7 @@ public class CoreController : MonoBehaviour
         Instance = this;
         
         // Instantiating the model prefab we want to play with
-        sceneObject = Instantiate(prefabObject);
+        sceneObject = Instantiate(prefabObject).GetComponent<ObjectController>();
     }
 
     // Start() is used to make sure all of our events aren't null
@@ -49,15 +49,15 @@ public class CoreController : MonoBehaviour
     }
     
     // Once the scene object is initialized, we want to initialize the UI with correct values
-    private void SceneObjectInitializedEvent(Dictionary<string, bool> limbList)
+    private void SceneObjectInitializedEvent(List<LimbController> limbsList)
     {
-        foreach (var key in limbList)
+        foreach (LimbController limb in limbsList)
         {
             Object prefabStatusLine = Resources.Load("Limb Status Line");
             GameObject UILine = Instantiate(prefabStatusLine, UICanvas.transform) as GameObject;
-            UILine.name = key.Key;
+            UILine.name = limb.gameObject.name;
             UILines.Add(UILine);
-            AttachmentEvent(key.Key, key.Value);
+            AttachmentEvent(limb.name, limb.attached);
         }
     }
     
@@ -73,5 +73,10 @@ public class CoreController : MonoBehaviour
                 UILine.GetComponent<Text>().text = limbName + ": " + substring;
             }
         }
+    }
+
+    public void OnResetLimbsButtonClicked()
+    {
+        sceneObject.ResetLimbs();
     }
 }

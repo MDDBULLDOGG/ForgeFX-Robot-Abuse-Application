@@ -11,7 +11,7 @@ public class ObjectController : MonoBehaviour
     public GameObject snapIndicatorPrefab;
 
     // Runtime Vars
-    public Dictionary<string, bool> limbList = new Dictionary<string, bool>();
+    public List<LimbController> limbsList = new List<LimbController>();
     
     private void Start()
     {
@@ -20,7 +20,7 @@ public class ObjectController : MonoBehaviour
         Initialize();
 
         // Call our event so that the CoreController knows our object has been properly initialized
-        CoreController.Instance.sceneObjectInitialized.Invoke(limbList);
+        CoreController.Instance.sceneObjectInitialized.Invoke(limbsList);
     }
 
     public void Initialize()
@@ -36,7 +36,19 @@ public class ObjectController : MonoBehaviour
             LimbController limbController = limb.gameObject.AddComponent<LimbController>();
             limbController.snapIndicatorPrefab = snapIndicatorPrefab;
             
-            limbList.Add(limb.name, limbController.attached);
+            limbsList.Add(limbController);
+        }
+    }
+
+    public void ResetLimbs()
+    {
+        foreach (LimbController limb in limbsList)
+        {
+            // Since we want to consider our root to be immovable, we skip this transform
+            if (limb.transform == root.transform) continue;
+
+            if(limb.attached == false)
+                limb.ResetLimb();
         }
     }
 }

@@ -49,6 +49,6 @@ public class ObjectControllerUnitTest
         }
    
         objectController.Initialize();
-        Assert.AreEqual(5, objectController.limbList.Count);
+        Assert.AreEqual(5, objectController.limbsList.Count);
     }
 }

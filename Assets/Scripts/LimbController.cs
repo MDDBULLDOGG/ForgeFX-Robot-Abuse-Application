@@ -121,6 +121,18 @@ public class LimbController : MonoBehaviour
         UnHighlightAllChildren();
     }
 
+    public void ResetLimb()
+    {
+        openSocketPos = (Quaternion.Euler(originalParent.transform.eulerAngles) * originalLocalPosition) +
+                        originalParent.transform.position;
+        
+        this.transform.parent = originalParent.transform;
+        this.transform.position = openSocketPos;
+                    
+        attached = true;
+        CoreController.Instance.attachmentStatusChanged.Invoke(this.name, attached);
+    }
+
     private void HighlightAllChildren()
     {
         // Since the children will be following the parent we want to highlight/unhighlight all children
