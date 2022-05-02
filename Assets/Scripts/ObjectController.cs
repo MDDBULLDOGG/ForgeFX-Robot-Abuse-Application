@@ -9,7 +9,7 @@ public class ObjectController : MonoBehaviour
     public GameObject root;
 
     private Dictionary<string, bool> limbList = new Dictionary<string, bool>();
-    void Start()
+    private void Start()
     {
         // First, initializing colliders for all objects we want to consider movable
         foreach (Transform child in root.GetComponentsInChildren<Transform>())

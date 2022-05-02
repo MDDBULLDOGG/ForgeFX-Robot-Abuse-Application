@@ -1,13 +1,16 @@
+using System;
 using UnityEngine;
 
 public class SelectionController : MonoBehaviour
 {
     private Color originalColor;
     private BoxCollider rayCastPlaneCollider;
-    private bool highlighted;
     public bool attached = true;
     private GameObject originalParent;
     private Vector3 originalLocalPosition;
+    private Renderer meshRenderer;
+    private bool isBeingDragged = false;
+    private Vector3 openSocketPos;
 
     private float snapDistance = 0.005f;
     
@@ -18,26 +21,26 @@ public class SelectionController : MonoBehaviour
         originalParent = this.transform.parent.gameObject;
         originalLocalPosition = this.transform.localPosition;
         rayCastPlaneCollider = CoreController.Instance.raycastPlane.GetComponent<BoxCollider>();
+        meshRenderer = this.GetComponent<Renderer>();
     }
     
     private void OnMouseEnter()
     {
-        // Since the children will be following the parent we want to highlight/unhighlight all children
-        foreach (Transform child in this.GetComponentsInChildren<Transform>())
-        {
-            child.GetComponent<SelectionController>().ToggleHighlight();
-        }
+        HighlightAllChildren();
     }
 
     private void OnMouseDrag()
     {
+        if (!isBeingDragged)
+            isBeingDragged = true;
+
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (rayCastPlaneCollider.Raycast(ray, out hit, 10))
         {
             // This is calculating the local socket position every frame when the mouse is dragging.
             // TODO: This is inefficient as we should only be checking the distance itself, fix it
-            var openSocketPos = (Quaternion.Euler(originalParent.transform.eulerAngles) * originalLocalPosition) +
+            openSocketPos = (Quaternion.Euler(originalParent.transform.eulerAngles) * originalLocalPosition) +
                                 originalParent.transform.position;
 
             // Calculating distance as a 2d length against the raycastPanel to get around the depth issue.
@@ -54,9 +57,8 @@ public class SelectionController : MonoBehaviour
                     attached = false;
                     CoreController.Instance.attachmentStatusChanged.Invoke(this.name, attached);
                 }
-            }
-
-            if (attached == false)
+            } 
+            else
             {
                 if (distance.sqrMagnitude < snapDistance)
                 {
@@ -74,28 +76,53 @@ public class SelectionController : MonoBehaviour
         }
     }
 
-    private void OnMouseExit()
+    private void OnMouseUp()
     {
+        if (isBeingDragged)
+            isBeingDragged = false;
+        
         // Since the children will be following the parent we want to highlight/unhighlight all children
-        foreach (Transform child in this.GetComponentsInChildren<Transform>())
+        foreach (Transform limb in this.GetComponentsInChildren<Transform>())
         {
-            child.GetComponent<SelectionController>().ToggleHighlight();
+            // limb.GetComponent<SelectionController>().ToggleHighlight();
+            limb.GetComponent<SelectionController>().Unhighlight();
         }
     }
 
-    // TODO: There's a bug where highlights can fall out of sync when moving the mouse quickly. Revisit this code
-    private void ToggleHighlight()
+    private void OnMouseExit()
     {
-        if (highlighted)
+        if(isBeingDragged)
+            return;
+        
+        UnHighlightAllChildren();
+    }
+
+    private void HighlightAllChildren()
+    {
+        // Since the children will be following the parent we want to highlight/unhighlight all children
+        foreach (SelectionController limb in this.GetComponentsInChildren<SelectionController>())
         {
-            this.GetComponent<Renderer>().material.color = originalColor;
-            highlighted = false;
+            limb.Highlight();
         }
-        else
+    }
+
+    private void Highlight()
+    {
+        meshRenderer.material.color = Color.yellow;
+    }
+
+    private void UnHighlightAllChildren()
+    {
+        // Since the children will be following the parent we want to highlight/unhighlight all children
+        foreach (SelectionController limb in this.GetComponentsInChildren<SelectionController>())
         {
-            this.GetComponent<Renderer>().material.color = Color.yellow;
-            highlighted = true;
+            limb.Unhighlight();
         }
+    }
+    
+    private void Unhighlight()
+    {
+        meshRenderer.material.color = originalColor;
     }
     
     private void OnDrawGizmosSelected()

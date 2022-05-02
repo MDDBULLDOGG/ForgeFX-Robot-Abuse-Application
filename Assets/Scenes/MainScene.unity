@@ -196,6 +196,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c3ecb108a1dfc046ae670c3a65ab2d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  prefabObject: {fileID: 3245585200342826652, guid: ec189218c1cbca446a6c32868150bc03, type: 3}
   UICanvas: {fileID: 1849653419}
   raycastPlane: {fileID: 283094917}
   sceneObject: {fileID: 0}

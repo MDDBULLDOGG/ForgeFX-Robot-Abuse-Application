@@ -11,6 +11,7 @@ public class CoreController : MonoBehaviour
 { 
     public Events.sceneObjectInitialized sceneObjectInitialized;
     public Events.attachmentStatusChanged attachmentStatusChanged;
+    public GameObject prefabObject;
 
     public static CoreController Instance { get; private set; }
 
@@ -20,7 +21,7 @@ public class CoreController : MonoBehaviour
 
     private List<GameObject> UILines = new List<GameObject>();
 
-    void Awake()
+    public void Awake()
     {
         // Making sure this is our only instance of CoreController
         if (Instance != null && Instance != this)
@@ -31,11 +32,10 @@ public class CoreController : MonoBehaviour
         Instance = this;
         
         // Instantiating the model prefab we want to play with
-        Object prefabObject = Resources.Load("Robot_Toy_Prefab");
-        sceneObject = Instantiate(prefabObject) as GameObject;
+        sceneObject = Instantiate(prefabObject);
     }
 
-    void Start()
+    private void Start()
     {
         sceneObjectInitialized ??= new Events.sceneObjectInitialized();
         sceneObjectInitialized.AddListener(SceneObjectInitializedEvent);
@@ -44,15 +44,13 @@ public class CoreController : MonoBehaviour
         attachmentStatusChanged.AddListener(AttachmentEvent);
     }
     
-    // Once these scene object is initialized, we want to initialize the UI with the correct values
-    void SceneObjectInitializedEvent(Dictionary<string, bool> limbList)
+    // Once the scene object is initialized, we want to initialize the UI with the correct values
+    private void SceneObjectInitializedEvent(Dictionary<string, bool> limbList)
     {
-        ObjectController sceneObjectController = sceneObject.GetComponent<ObjectController>();
-        
         foreach (var key in limbList)
         {
             Object prefabStatusLine = Resources.Load("Limb Status Line");
-            GameObject UILine = Instantiate(prefabStatusLine, CoreController.Instance.UICanvas.transform) as GameObject;
+            GameObject UILine = Instantiate(prefabStatusLine, UICanvas.transform) as GameObject;
             UILine.name = key.Key;
             UILines.Add(UILine);
             AttachmentEvent(key.Key, key.Value);
@@ -60,7 +58,7 @@ public class CoreController : MonoBehaviour
     }
     
     // Updating our UI with correct values every time an attachmentEvent is fired
-    void AttachmentEvent(string limbName, bool attached)
+    private void AttachmentEvent(string limbName, bool attached)
     {
         foreach (GameObject UILine in UILines)
         {
