@@ -1,24 +1,31 @@
 using UnityEngine;
 
-// The LimbController script is responsible for the logic that drives the limb selection/movement
-// feature, as well as the events for changing attachment status.
+/// <summary>
+/// The LimbController script is responsible for the logic that drives the limb selection/movement
+/// feature, as well as the events for changing attachment status.
+/// </summary>
 
 public class LimbController : MonoBehaviour
 {
     // Inspector Vars
-    [SerializeField] public GameObject snapIndicatorPrefab;
+    public GameObject snapIndicatorPrefab;
 
-    // Our limb's Renderer and it's original values for reverting back to
-    private Renderer meshRenderer;
-    private Color originalColor;
-    private GameObject originalParent;
-    private Vector3 originalLocalPosition;
+    public class OriginalValues
+    {
+        public Renderer meshRenderer;
+        public Color originalColor;
+        public GameObject originalParent;
+        public Vector3 originalLocalPosition;
+        public Material originalMaterial;
+    }
+    public OriginalValues limbValues = new OriginalValues();
     
     // Runtime Vars
     private BoxCollider rayCastPlaneCollider;
     public bool attached = true;
     private Vector3 openSocketPos;
     private GameObject snapIndicatorObject;
+    public ObjectController rootObject;
     
     // isBeingDragged is necessary because our mouse can leave the limb while it's being dragged,
     // and we don't want the highlight to change until OnMouseUp in that case.
@@ -27,20 +34,37 @@ public class LimbController : MonoBehaviour
     // Arbitrary distance for when we should snap a limb to it's socket
     private float snapDistance = 0.0025f;
     
+    // void OnEnable()
+    // {
+    //     Actions.OnMouseOver += HandleMouseOver;
+    // }
+    //
+    // void OnDisable()
+    // {
+    //     Actions.OnMouseOver -= HandleMouseOver;
+    // }
+    
     private void Start()
     {
-        originalColor = this.GetComponent<Renderer>().material.color;
-        originalParent = this.transform.parent.gameObject;
-        originalLocalPosition = this.transform.localPosition;
-        rayCastPlaneCollider = CoreController.Instance.raycastPlane.GetComponent<BoxCollider>();
-        meshRenderer = this.GetComponent<Renderer>();
+        limbValues.originalColor = this.GetComponent<Renderer>().material.color;
+        limbValues.originalParent = this.transform.parent.gameObject;
+        limbValues.originalLocalPosition = this.transform.localPosition;
+        limbValues.meshRenderer = this.GetComponent<Renderer>();
+        limbValues.originalMaterial = this.GetComponent<Renderer>().material;
+
+        rayCastPlaneCollider = rootObject.raycastPlane.GetComponent<BoxCollider>();
     }
     
-    private void OnMouseEnter()
+    // private void OnMouseEnter()
+    // {
+    //     HighlightAllChildren();
+    // }
+
+    private void HandleMouseOver()
     {
         HighlightAllChildren();
     }
-
+    
     private void OnMouseDrag()
     {
         if (!isBeingDragged)
@@ -54,8 +78,8 @@ public class LimbController : MonoBehaviour
         
         // This is calculating the local socket position every frame when the mouse is dragging.
         // TODO: This is inefficient as we should only be checking the distance itself, fix it
-        openSocketPos = (Quaternion.Euler(originalParent.transform.eulerAngles) * originalLocalPosition) +
-                        originalParent.transform.position;
+        openSocketPos = (Quaternion.Euler(limbValues.originalParent.transform.eulerAngles) * limbValues.originalLocalPosition) +
+                        limbValues.originalParent.transform.position;
 
         // Calculating distance as a 2d length against the raycastPanel to get around the depth issue.
         // This only works because our camera is fixed.
@@ -74,7 +98,9 @@ public class LimbController : MonoBehaviour
                 this.transform.parent = null;
 
                 attached = false;
-                CoreController.Instance.attachmentStatusChanged.Invoke(this.name, attached);
+                Actions.OnLimbStatusChanged(this);
+
+                // CoreController.Instance.attachmentStatusChanged.Invoke(this.name, attached);
             }
         } 
         else
@@ -87,11 +113,13 @@ public class LimbController : MonoBehaviour
             
             if (distance.sqrMagnitude < snapDistance)
             {
-                this.transform.parent = originalParent.transform;
+                this.transform.parent = limbValues.originalParent.transform;
                 this.transform.position = openSocketPos;
                     
                 attached = true;
-                CoreController.Instance.attachmentStatusChanged.Invoke(this.name, attached);
+                Actions.OnLimbStatusChanged(this);
+
+                // CoreController.Instance.attachmentStatusChanged.Invoke(this.name, attached);
             }
             else
             {
@@ -109,8 +137,6 @@ public class LimbController : MonoBehaviour
         {
             Destroy(snapIndicatorObject);
         }
-        
-        UnHighlightAllChildren();
     }
 
     private void OnMouseExit()
@@ -123,14 +149,14 @@ public class LimbController : MonoBehaviour
 
     public void ResetLimb()
     {
-        openSocketPos = (Quaternion.Euler(originalParent.transform.eulerAngles) * originalLocalPosition) +
-                        originalParent.transform.position;
+        openSocketPos = (Quaternion.Euler(limbValues.originalParent.transform.eulerAngles) * limbValues.originalLocalPosition) +
+                        limbValues.originalParent.transform.position;
         
-        this.transform.parent = originalParent.transform;
+        this.transform.parent = limbValues.originalParent.transform;
         this.transform.position = openSocketPos;
                     
         attached = true;
-        CoreController.Instance.attachmentStatusChanged.Invoke(this.name, attached);
+        Actions.OnLimbStatusChanged(this);
     }
 
     private void HighlightAllChildren()
@@ -144,7 +170,7 @@ public class LimbController : MonoBehaviour
 
     private void Highlight()
     {
-        meshRenderer.material.color = Color.yellow;
+        limbValues.meshRenderer.material.color = Color.yellow;
     }
 
     private void UnHighlightAllChildren()
@@ -158,13 +184,13 @@ public class LimbController : MonoBehaviour
     
     private void Unhighlight()
     {
-        meshRenderer.material.color = originalColor;
+        limbValues.meshRenderer.material.color = limbValues.originalColor;
     }
     
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        var newPos = Quaternion.Euler(originalParent.transform.eulerAngles) * originalLocalPosition;
-        Gizmos.DrawWireSphere(originalParent.transform.position + newPos, 0.025f);
+        var newPos = Quaternion.Euler(limbValues.originalParent.transform.eulerAngles) * limbValues.originalLocalPosition;
+        Gizmos.DrawWireSphere(limbValues.originalParent.transform.position + newPos, 0.025f);
     }
 }
