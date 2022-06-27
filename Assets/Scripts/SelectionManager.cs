@@ -10,12 +10,12 @@ public class SelectionManager : MonoBehaviour
     
     void OnEnable()
     {
-        Actions.OnLimbStatusChanged += HandleLimbStatusChanged;
+        LimbController.OnLimbStatusChanged += HandleLimbStatusChanged;
     }
 
     void OnDisable()
     {
-        Actions.OnLimbStatusChanged -= HandleLimbStatusChanged;
+        LimbController.OnLimbStatusChanged -= HandleLimbStatusChanged;
     }
 
     private void HandleLimbDragged(LimbController limbRef)

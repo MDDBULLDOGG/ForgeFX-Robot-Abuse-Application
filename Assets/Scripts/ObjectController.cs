@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,7 +14,8 @@ public class ObjectController : MonoBehaviour
     public GameObject raycastPlane;
 
     public List<LimbController> limbsList = new List<LimbController>();
-    
+    public static event Action<ObjectController> OnNewObjectInitialized = delegate { };
+
     private void Start()
     {
         // Usually I would have this script's Initialize() method as part of Start(), however
@@ -36,7 +38,7 @@ public class ObjectController : MonoBehaviour
             limbsList.Add(limbController);
         }
         
-        Actions.OnNewObjectInitialized(this);
+        OnNewObjectInitialized(this);
     }
 
     public void ResetLimbs()

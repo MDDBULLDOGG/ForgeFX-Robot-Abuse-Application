@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -9,16 +10,23 @@ public class LimbController : MonoBehaviour
 {
     // Inspector Vars
     public GameObject snapIndicatorPrefab;
+    public static event Action<LimbController> OnLimbStatusChanged = delegate { };
 
     public class OriginalValues
     {
         public Renderer meshRenderer;
-        public Color originalColor;
+        public Material originalMaterial;
         public GameObject originalParent;
         public Vector3 originalLocalPosition;
-        public Material originalMaterial;
+        
+        public OriginalValues(LimbController ctx)
+        {
+            meshRenderer = ctx.GetComponent<Renderer>();
+            originalMaterial = meshRenderer.material;
+            originalParent = ctx.transform.parent.gameObject;
+            originalLocalPosition = ctx.transform.localPosition;
+        }
     }
-    public OriginalValues limbValues = new OriginalValues();
     
     // Runtime Vars
     private BoxCollider rayCastPlaneCollider;
@@ -26,6 +34,8 @@ public class LimbController : MonoBehaviour
     private Vector3 openSocketPos;
     private GameObject snapIndicatorObject;
     public ObjectController rootObject;
+
+    public OriginalValues limbValues;
     
     // isBeingDragged is necessary because our mouse can leave the limb while it's being dragged,
     // and we don't want the highlight to change until OnMouseUp in that case.
@@ -33,38 +43,14 @@ public class LimbController : MonoBehaviour
 
     // Arbitrary distance for when we should snap a limb to it's socket
     private float snapDistance = 0.0025f;
-    
-    // void OnEnable()
-    // {
-    //     Actions.OnMouseOver += HandleMouseOver;
-    // }
-    //
-    // void OnDisable()
-    // {
-    //     Actions.OnMouseOver -= HandleMouseOver;
-    // }
-    
+
     private void Start()
     {
-        limbValues.originalColor = this.GetComponent<Renderer>().material.color;
-        limbValues.originalParent = this.transform.parent.gameObject;
-        limbValues.originalLocalPosition = this.transform.localPosition;
-        limbValues.meshRenderer = this.GetComponent<Renderer>();
-        limbValues.originalMaterial = this.GetComponent<Renderer>().material;
-
+        limbValues = new OriginalValues(this);
+        
         rayCastPlaneCollider = rootObject.raycastPlane.GetComponent<BoxCollider>();
     }
-    
-    // private void OnMouseEnter()
-    // {
-    //     HighlightAllChildren();
-    // }
 
-    private void HandleMouseOver()
-    {
-        HighlightAllChildren();
-    }
-    
     private void OnMouseDrag()
     {
         if (!isBeingDragged)
@@ -98,9 +84,7 @@ public class LimbController : MonoBehaviour
                 this.transform.parent = null;
 
                 attached = false;
-                Actions.OnLimbStatusChanged(this);
-
-                // CoreController.Instance.attachmentStatusChanged.Invoke(this.name, attached);
+                OnLimbStatusChanged(this);
             }
         } 
         else
@@ -117,9 +101,7 @@ public class LimbController : MonoBehaviour
                 this.transform.position = openSocketPos;
                     
                 attached = true;
-                Actions.OnLimbStatusChanged(this);
-
-                // CoreController.Instance.attachmentStatusChanged.Invoke(this.name, attached);
+                OnLimbStatusChanged(this);
             }
             else
             {
@@ -139,14 +121,6 @@ public class LimbController : MonoBehaviour
         }
     }
 
-    private void OnMouseExit()
-    {
-        if(isBeingDragged)
-            return;
-        
-        UnHighlightAllChildren();
-    }
-
     public void ResetLimb()
     {
         openSocketPos = (Quaternion.Euler(limbValues.originalParent.transform.eulerAngles) * limbValues.originalLocalPosition) +
@@ -156,7 +130,7 @@ public class LimbController : MonoBehaviour
         this.transform.position = openSocketPos;
                     
         attached = true;
-        Actions.OnLimbStatusChanged(this);
+        OnLimbStatusChanged(this);
     }
 
     private void HighlightAllChildren()
@@ -173,20 +147,6 @@ public class LimbController : MonoBehaviour
         limbValues.meshRenderer.material.color = Color.yellow;
     }
 
-    private void UnHighlightAllChildren()
-    {
-        // Since the children will be following the parent we want to highlight/unhighlight all children
-        foreach (LimbController limb in this.GetComponentsInChildren<LimbController>())
-        {
-            limb.Unhighlight();
-        }
-    }
-    
-    private void Unhighlight()
-    {
-        limbValues.meshRenderer.material.color = limbValues.originalColor;
-    }
-    
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;

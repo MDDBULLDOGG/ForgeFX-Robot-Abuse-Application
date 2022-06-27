@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,14 +19,14 @@ public class UIManager : MonoBehaviour
     
     void OnEnable()
     {
-        Actions.OnNewObjectInitialized += HandleNewObjectInitialized;
-        Actions.OnLimbStatusChanged += UpdateUI;
+        ObjectController.OnNewObjectInitialized += HandleNewObjectInitialized;
+        LimbController.OnLimbStatusChanged += UpdateUI;
     }
 
     void OnDisable()
     {
-        Actions.OnNewObjectInitialized -= HandleNewObjectInitialized;
-        Actions.OnLimbStatusChanged -= UpdateUI;
+        ObjectController.OnNewObjectInitialized -= HandleNewObjectInitialized;
+        LimbController.OnLimbStatusChanged -= UpdateUI;
     }
 
     private void HandleNewObjectInitialized(ObjectController objectRef)
