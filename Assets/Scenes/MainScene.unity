@@ -620,9 +620,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 2003637255}
         m_TargetAssemblyTypeName: CoreController, ScriptsAssembly
-        m_MethodName: OnResetLimbsButtonClicked
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -827,7 +827,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   camera: {fileID: 963194227}
+  rayCastPlaneCollider: {fileID: 283094918}
+  snapIndicatorPrefab: {fileID: 1290648295511871007, guid: 5d3ca2b2f8dfdb240b33a18c7ca55a5f, type: 3}
   highlightMaterial: {fileID: 2100000, guid: 2209d458996916745baa00289c9ce6f1, type: 2}
+  snapDistance: 0.0025
 --- !u!4 &2003637257
 Transform:
   m_ObjectHideFlags: 0

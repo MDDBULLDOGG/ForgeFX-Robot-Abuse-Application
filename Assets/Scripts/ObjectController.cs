@@ -13,9 +13,11 @@ public class ObjectController : MonoBehaviour
     public GameObject snapIndicatorPrefab;
     public GameObject raycastPlane;
 
+    private LimbController selection;
+
     public List<LimbController> limbsList = new List<LimbController>();
     public static event Action<ObjectController> OnNewObjectInitialized = delegate { };
-
+    
     private void Start()
     {
         // Usually I would have this script's Initialize() method as part of Start(), however
@@ -51,10 +53,5 @@ public class ObjectController : MonoBehaviour
             if(limb.attached == false)
                 limb.ResetLimb();
         }
-    }
-
-    private void HandleSelectionChanged(LimbController limb)
-    {
-        Debug.LogError("Selection changed to: " + limb.name + "");
     }
 }

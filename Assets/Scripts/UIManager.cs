@@ -29,6 +29,8 @@ public class UIManager : MonoBehaviour
         LimbController.OnLimbStatusChanged -= UpdateUI;
     }
 
+    // Reset button is currently broken, unsure how to approach this via system actions.
+    // TODO: ASK ABOUT THIS
     private void HandleNewObjectInitialized(ObjectController objectRef)
     {
         foreach (LimbController limb in objectRef.limbsList)

@@ -9,6 +9,7 @@ using UnityEngine;
 public class LimbController : MonoBehaviour
 {
     // Inspector Vars
+    public Vector3 snapPos;
     public GameObject snapIndicatorPrefab;
     public static event Action<LimbController> OnLimbStatusChanged = delegate { };
 
@@ -19,12 +20,12 @@ public class LimbController : MonoBehaviour
         public GameObject originalParent;
         public Vector3 originalLocalPosition;
         
-        public OriginalValues(LimbController ctx)
+        public OriginalValues(LimbController limb)
         {
-            meshRenderer = ctx.GetComponent<Renderer>();
+            meshRenderer = limb.GetComponent<Renderer>();
             originalMaterial = meshRenderer.material;
-            originalParent = ctx.transform.parent.gameObject;
-            originalLocalPosition = ctx.transform.localPosition;
+            originalParent = limb.transform.parent.gameObject;
+            originalLocalPosition = limb.transform.localPosition;
         }
     }
     
@@ -50,101 +51,54 @@ public class LimbController : MonoBehaviour
         
         rayCastPlaneCollider = rootObject.raycastPlane.GetComponent<BoxCollider>();
     }
-
-    private void OnMouseDrag()
+    
+    void OnEnable()
     {
-        if (!isBeingDragged)
-            isBeingDragged = true;
+        SelectionManager.OnMouseDragLimb += HandleMouseDragLimb;
+        SelectionManager.OnSnapLimb += HandleSnapLimb;
+    }
 
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        
-        if (!rayCastPlaneCollider.Raycast(ray, out hit, 10)) 
-            return;
-        
-        // This is calculating the local socket position every frame when the mouse is dragging.
-        // TODO: This is inefficient as we should only be checking the distance itself, fix it
-        openSocketPos = (Quaternion.Euler(limbValues.originalParent.transform.eulerAngles) * limbValues.originalLocalPosition) +
-                        limbValues.originalParent.transform.position;
+    void OnDisable()
+    {
+        SelectionManager.OnMouseDragLimb -= HandleMouseDragLimb;
+        SelectionManager.OnSnapLimb -= HandleSnapLimb;
+    }
 
-        // Calculating distance as a 2d length against the raycastPanel to get around the depth issue.
-        // This only works because our camera is fixed.
-        Vector3 distance = new Vector3(hit.point.x, hit.point.y, 0) -
-                           new Vector3(openSocketPos.x, openSocketPos.y, 0);
-            
+    private void HandleMouseDragLimb(LimbController limb, Vector2 hit)
+    {
+        if (limb != this) return;
+        
+        this.transform.position = hit;
+
         if (attached)
         {
-            if (snapIndicatorObject != null)
-            {
-                Destroy(snapIndicatorObject);
-            }
-            
-            if (distance.sqrMagnitude > snapDistance)
-            {
-                this.transform.parent = null;
-
-                attached = false;
-                OnLimbStatusChanged(this);
-            }
-        } 
-        else
-        {
-            if (snapIndicatorObject == null)
-            {
-                snapIndicatorObject = Instantiate(snapIndicatorPrefab, openSocketPos, Quaternion.identity);
-                snapIndicatorObject.transform.localScale = new Vector3(snapDistance, snapDistance, snapDistance);
-            }
-            
-            if (distance.sqrMagnitude < snapDistance)
-            {
-                this.transform.parent = limbValues.originalParent.transform;
-                this.transform.position = openSocketPos;
-                    
-                attached = true;
-                OnLimbStatusChanged(this);
-            }
-            else
-            {
-                this.transform.position = hit.point;
-            }
+            this.transform.parent = null;
+            attached = false;
+            OnLimbStatusChanged(this);
         }
-    }
-
-    private void OnMouseUp()
-    {
-        if (isBeingDragged)
-            isBeingDragged = false;
         
-        if (snapIndicatorObject != null)
-        {
-            Destroy(snapIndicatorObject);
-        }
     }
 
-    public void ResetLimb()
+    private void HandleSnapLimb(LimbController limb)
     {
-        openSocketPos = (Quaternion.Euler(limbValues.originalParent.transform.eulerAngles) * limbValues.originalLocalPosition) +
-                        limbValues.originalParent.transform.position;
+        if (limb != this) return;
         
         this.transform.parent = limbValues.originalParent.transform;
-        this.transform.position = openSocketPos;
-                    
+        this.transform.position = snapPos;
         attached = true;
         OnLimbStatusChanged(this);
     }
 
-    private void HighlightAllChildren()
+    public void ResetLimb()
     {
-        // Since the children will be following the parent we want to highlight/unhighlight all children
-        foreach (LimbController limb in this.GetComponentsInChildren<LimbController>())
-        {
-            limb.Highlight();
-        }
-    }
-
-    private void Highlight()
-    {
-        limbValues.meshRenderer.material.color = Color.yellow;
+        snapPos = (Quaternion.Euler(limbValues.originalParent.transform.eulerAngles) * limbValues.originalLocalPosition) +
+                        limbValues.originalParent.transform.position;
+        
+        this.transform.parent = limbValues.originalParent.transform;
+        this.transform.position = snapPos;
+                    
+        attached = true;
+        OnLimbStatusChanged(this);
     }
 
     private void OnDrawGizmosSelected()
