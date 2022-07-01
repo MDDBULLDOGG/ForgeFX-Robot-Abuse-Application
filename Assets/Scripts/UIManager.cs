@@ -6,31 +6,39 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 { 
     [SerializeField] private Canvas UICanvas;
+    [SerializeField] private Button resetButton;
 
     private List<GameObject> UILines = new List<GameObject>();
+    
+    public static event Action OnResetButtonClicked = delegate { };
 
+    private void OnEnable()
+    {
+        ObjectController.OnNewObjectInitialized += HandleNewObjectInitialized;
+        LimbController.OnLimbStatusChanged += UpdateUI;
+        resetButton.onClick.AddListener(ResetButtonClicked);
+    }
+
+    private void OnDisable()
+    {
+        ObjectController.OnNewObjectInitialized -= HandleNewObjectInitialized;
+        LimbController.OnLimbStatusChanged -= UpdateUI;
+        resetButton.onClick.RemoveAllListeners();
+    }
+    
     private void Start()
     {
-        if (UICanvas == null)
+        if (UICanvas == null || resetButton == null)
         {
             Debug.LogError("UIManager: Ensure all SerializedFields are set.");
         }
     }
     
-    void OnEnable()
+    private void ResetButtonClicked()
     {
-        ObjectController.OnNewObjectInitialized += HandleNewObjectInitialized;
-        LimbController.OnLimbStatusChanged += UpdateUI;
+        OnResetButtonClicked();
     }
-
-    void OnDisable()
-    {
-        ObjectController.OnNewObjectInitialized -= HandleNewObjectInitialized;
-        LimbController.OnLimbStatusChanged -= UpdateUI;
-    }
-
-    // Reset button is currently broken, unsure how to approach this via system actions.
-    // TODO: ASK ABOUT THIS
+    
     private void HandleNewObjectInitialized(ObjectController objectRef)
     {
         foreach (LimbController limb in objectRef.limbsList)

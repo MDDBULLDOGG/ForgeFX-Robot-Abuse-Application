@@ -6,7 +6,6 @@ public class SelectionManager : MonoBehaviour
 {
     [SerializeField] private Camera camera;
     [SerializeField] private BoxCollider rayCastPlaneCollider;
-
     [SerializeField] private GameObject snapIndicatorPrefab;
     [SerializeField] private Material highlightMaterial;
     [SerializeField] private float snapDistance;
@@ -21,13 +20,13 @@ public class SelectionManager : MonoBehaviour
     public static event Action<LimbController> OnSnapLimb = delegate { };
 
 
-    void OnEnable()
+    private void OnEnable()
     {
         SelectionManager.OnMouseEnterLimb += HandleMouseOverLimb;
         SelectionManager.OnMouseExitLimb += HandleMouseExitLimb;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         SelectionManager.OnMouseEnterLimb -= HandleMouseOverLimb;
         SelectionManager.OnMouseExitLimb -= HandleMouseExitLimb;
@@ -68,13 +67,9 @@ public class SelectionManager : MonoBehaviour
             if (!rayCastPlaneCollider.Raycast(ray, out hit, 10)) 
                 return;
             
-            // This is calculating the local socket position every frame when the mouse is dragging.
-            // TODO: This is inefficient as we should only be checking the distance itself, fix it
             selection.snapPos = (Quaternion.Euler(selection.limbValues.originalParent.transform.eulerAngles) * selection.limbValues.originalLocalPosition) +
                             selection.limbValues.originalParent.transform.position;
             
-            // Calculating distance as a 2d length against the raycastPanel to get around the depth issue.
-            // This only works because our camera is fixed.
             Vector3 distance = new Vector3(hit.point.x, hit.point.y, 0) -
                                new Vector3(selection.snapPos.x, selection.snapPos.y, 0);
 
